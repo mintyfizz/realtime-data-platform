@@ -1,0 +1,4 @@
+kafka-python==2.3.0
+requests>=2.31.0
+pyspark==3.5.0
+cassandra-driver>=3.29.0
