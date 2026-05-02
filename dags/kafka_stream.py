@@ -31,7 +31,7 @@ def format_data(res):
         + ' ' + res['location']['state']
         + ' ' + res['location']['country']
     )
-    data['postcode'] = res['location']['postcode']
+    data['postcode'] = str(res['location']['postcode'])
     data['email'] = res['email']
     data['username'] = res['login']['username'] 
     data['dob'] = res['dob']['date']
@@ -61,8 +61,13 @@ def stream_data():
             producer.send('user_data', json.dumps(res).encode('utf-8'))
         except Exception as e:
             logging.error(f"Error sending message to Kafka: {e}")
-            continue    
-    
+            continue
+
+    try:
+        producer.flush()
+    except Exception as e:
+        logging.error(f"Error flushing Kafka producer: {e}")
+
     
 
 with DAG('user_automation',
