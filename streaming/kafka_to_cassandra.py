@@ -42,48 +42,6 @@ def create_table(session):
     print("Table created successfully or already exists")
 
 
-def insert_data(session, **kwargs):
-    print("Inserting data into Cassandra...")
-    first_name = kwargs.get("first_name")
-    last_name = kwargs.get("last_name")
-    gender = kwargs.get("gender")
-    address = kwargs.get("address")
-    postcode = kwargs.get("postcode")
-    email = kwargs.get("email")
-    username = kwargs.get("username")
-    dob = kwargs.get("dob")
-    registered_date = kwargs.get("registered_date")
-    phone = kwargs.get("phone")
-    picture = kwargs.get("picture")
-
-    try:
-        session.execute(
-            """
-            INSERT INTO spark_streams.created_users (
-                id, first_name, last_name, gender, address,
-                postcode, email, username, dob, registered_date, phone, picture
-            )
-            VALUES (uuid(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            (
-                first_name,
-                last_name,
-                gender,
-                address,
-                postcode,
-                email,
-                username,
-                dob,
-                registered_date,
-                phone,
-                picture,
-            ),
-        )
-        print("Data inserted successfully")
-    except Exception as error:
-        logging.error("Error inserting data into Cassandra: %s", error)
-
-
 def create_spark_connection():
     try:
         spark_connection = (
@@ -172,7 +130,6 @@ if __name__ == "__main__":
             if session is not None:
                 create_keyspace(session)
                 create_table(session)
-                # insert_data(session)
 
                 streaming_query = (selection_df.writeStream.format("org.apache.spark.sql.cassandra")\
                 .option("keyspace", "spark_streams")\
