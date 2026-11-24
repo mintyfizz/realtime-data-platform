@@ -8,16 +8,27 @@ default_args = {
     'start_date': datetime(2026,3,24, 14,00) #start date for the DAG
 }
 
-def get_data():
-    #function to get data from API
-    import json 
-    import requests 
-    
-    res = requests.get('https://randomuser.me/api/')
-    res = res.json()
-    res = res['results'][0]
+API_URL = 'https://randomuser.me/api/'
+API_TIMEOUT_SECONDS = 10
 
-    return res 
+
+def get_data():
+    """Fetch one random user from the API.
+
+    Uses a request timeout so a stalled connection cannot block the task past
+    its 60-second streaming window, and raises on HTTP errors or an empty
+    payload so stream_data logs and skips the record instead of crashing
+    later with a KeyError/IndexError.
+    """
+    import requests
+
+    response = requests.get(API_URL, timeout=API_TIMEOUT_SECONDS)
+    response.raise_for_status()
+    results = response.json().get('results') or []
+    if not results:
+        raise ValueError('randomuser API returned no results')
+
+    return results[0]
 
 def format_data(res):
     data={}
